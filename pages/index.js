@@ -19,7 +19,7 @@ function ProfileRelationsBox(seguidores) {
       </h2>
 
       <ul>
-        {seguidores.items.slice(0,6).map((itemAtual) => {
+        {seguidores.items.slice(0, 6).map((itemAtual) => {
           return (
             <li key={itemAtual.login}>
               <a href={`https://github.com/${itemAtual.login}`} >
@@ -38,7 +38,9 @@ function ProfileRelationsBox(seguidores) {
 function ProfileSideBar(propriedades) {
   return (
     <Box as='aside'>
-      <img src={`https://github.com/${propriedades.gitHubUser}.png`} style={{ borderRadius: '8px' }} />
+      <a href={`https://github.com/${propriedades.gitHubUser}`} >
+        <img src={`https://github.com/${propriedades.gitHubUser}.png`} style={{ borderRadius: '8px' }} />
+      </a>
       <hr />
 
       <p>
@@ -67,14 +69,14 @@ export default function Home() {
   // 0 - Pegar o array de dados do github
   const [seguidores, setSeguidores] = useState([])
 
-    useEffect(() => {
-      fetch('https://api.github.com/users/patrickzequiel/followers')
-    .then(function (respostaDoServidor) {
-      return respostaDoServidor.json();
-    })
-    .then(function (respostaCompleta) {
-      setSeguidores(respostaCompleta);
-    })
+  useEffect(() => {
+    fetch('https://api.github.com/users/patrickzequiel/followers')
+      .then(function (respostaDoServidor) {
+        return respostaDoServidor.json();
+      })
+      .then(function (respostaCompleta) {
+        setSeguidores(respostaCompleta);
+      })
   }, [])
 
   useEffect(() => {
@@ -85,7 +87,8 @@ export default function Home() {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      body: JSON.stringify({ "query": `query {
+      body: JSON.stringify({
+        "query": `query {
         allCommunities {
           id
           title
@@ -93,14 +96,14 @@ export default function Home() {
         }
       }` })
     })
-  .then((response) => response.json())
-  .then((respostaCompleta) => {
-    const comunidadesVindasDoDato = respostaCompleta.data.allCommunities;
-    console.log(comunidadesVindasDoDato);
-    setComunidades(comunidadesVindasDoDato)
+      .then((response) => response.json())
+      .then((respostaCompleta) => {
+        const comunidadesVindasDoDato = respostaCompleta.data.allCommunities;
+        console.log(comunidadesVindasDoDato);
+        setComunidades(comunidadesVindasDoDato)
 
-  }
-  )
+      }
+      )
   }, [])
   // 1 - Criar um box que vai ter um map para buscar esse json
 
@@ -142,13 +145,13 @@ export default function Home() {
                   },
                   body: JSON.stringify(comunidade)
                 })
-                .then(async (response) => {
-                  const dados = await response.json();
-                  console.log(dados.registroCriado);
-                  const comunidade = dados.registroCriado;
-                  const comunidadesAtualizadas = [...comunidades, comunidade];
-                  setComunidades(comunidadesAtualizadas)
-                })
+                  .then(async (response) => {
+                    const dados = await response.json();
+                    console.log(dados.registroCriado);
+                    const comunidade = dados.registroCriado;
+                    const comunidadesAtualizadas = [...comunidades, comunidade];
+                    setComunidades(comunidadesAtualizadas)
+                  })
 
               }
             }>
@@ -180,7 +183,7 @@ export default function Home() {
             </h2>
 
             <ul>
-              {comunidades.slice(0,6).map((itemAtual) => {
+              {comunidades.slice(0, 6).map((itemAtual) => {
                 return (
                   <li key={itemAtual.id}>
                     <a href={`/comunities/${itemAtual.id}`} key={itemAtual.title}>
@@ -193,7 +196,7 @@ export default function Home() {
               })}
             </ul>
           </ProfileRelationsBoxWrapper>
-          <ProfileRelationsBox title="Seguidores" items={seguidores}/>
+          <ProfileRelationsBox title="Seguidores" items={seguidores} />
         </div>
       </MainGrid>
     </>
