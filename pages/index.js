@@ -2,7 +2,7 @@
 import MainGrid from '../src/components/MainGrid'
 import Box from '../src/components/Box'
 import { ProfileRelationsBoxWrapper } from '../src/components/ProfileRelations'
-import { AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet } from '../src/lib/OrkutComons'
+import { AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet } from '../src/lib/AlurakutCommons'
 import React, { useEffect, useState } from 'react'
 
 // TODO 
@@ -18,19 +18,19 @@ function ProfileRelationsBox(seguidores) {
         Pessoas da comunidade ({seguidores.items.length})
       </h2>
 
-      {/* <ul>
-        {seguidores.map((itemAtual) => {
+      <ul>
+        {seguidores.items.slice(0,6).map((itemAtual) => {
           return (
-            <li key={itemAtual}>
-              <a href={`/users/${itemAtual}`} >
-                <img src={`https://github.com/${itemAtual}.png`} style={{ borderRadius: '8px' }} />
-                <span>{itemAtual}</span>
+            <li key={itemAtual.login}>
+              <a href={`https://github.com/${itemAtual.login}`} >
+                <img src={`https://github.com/${itemAtual.login}.png`} style={{ borderRadius: '8px' }} />
+                <span>{itemAtual.login}</span>
               </a>
             </li>
 
           )
         })}
-      </ul> */}
+      </ul>
     </ProfileRelationsBoxWrapper>
   )
 }
@@ -180,7 +180,7 @@ export default function Home() {
             </h2>
 
             <ul>
-              {comunidades.map((itemAtual) => {
+              {comunidades.slice(0,6).map((itemAtual) => {
                 return (
                   <li key={itemAtual.id}>
                     <a href={`/comunities/${itemAtual.id}`} key={itemAtual.title}>
