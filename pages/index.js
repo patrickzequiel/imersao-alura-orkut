@@ -3,14 +3,37 @@ import MainGrid from '../src/components/MainGrid'
 import Box from '../src/components/Box'
 import { ProfileRelationsBoxWrapper } from '../src/components/ProfileRelations'
 import { AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet } from '../src/lib/OrkutComons'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 // TODO 
 // FAZER IMAGEM RENDERIZAR NO MENU 
-  // O QUE PRECISA FAZER PARA RENDERIZAR A IMAGEM
+// O QUE PRECISA FAZER PARA RENDERIZAR A IMAGEM
 // CRIAR UM COMPONENTE PARAR RENDERIZAR AS LISTAS E NÃO DEIXAR PASSAR DE 6
 // PROFILEAREA TRANSFORMAR EM SIDEBAR
 
+function ProfileRelationsBox(seguidores) {
+  return (
+    <ProfileRelationsBoxWrapper>
+      <h2 className="smallTitle">
+        Pessoas da comunidade ({seguidores.items.length})
+      </h2>
+
+      {/* <ul>
+        {seguidores.map((itemAtual) => {
+          return (
+            <li key={itemAtual}>
+              <a href={`/users/${itemAtual}`} >
+                <img src={`https://github.com/${itemAtual}.png`} style={{ borderRadius: '8px' }} />
+                <span>{itemAtual}</span>
+              </a>
+            </li>
+
+          )
+        })}
+      </ul> */}
+    </ProfileRelationsBoxWrapper>
+  )
+}
 
 function ProfileSideBar(propriedades) {
   return (
@@ -32,7 +55,7 @@ function ProfileSideBar(propriedades) {
 
 export default function Home() {
   const usuarioX = 'patrickzequiel'
-  const [comunidades, setComunidades] = React.useState([{id: 332432432432432342, title: 'Eu odieo acordar cedo', image: 'https://alurakut.vercel.app/capa-comunidade-01.jpg'}]);
+  const [comunidades, setComunidades] = React.useState([{ id: 332432432432432342, title: 'Eu odieo acordar cedo', image: 'https://alurakut.vercel.app/capa-comunidade-01.jpg' }]);
   const pessoasFavoritas = [
     'juunegreiros',
     'omariosouto',
@@ -41,6 +64,45 @@ export default function Home() {
     'marcobrunodev',
     'felipefialho'
   ]
+  // 0 - Pegar o array de dados do github
+  const [seguidores, setSeguidores] = useState([])
+
+    useEffect(() => {
+      fetch('https://api.github.com/users/patrickzequiel/followers')
+    .then(function (respostaDoServidor) {
+      return respostaDoServidor.json();
+    })
+    .then(function (respostaCompleta) {
+      setSeguidores(respostaCompleta);
+    })
+  }, [])
+
+  useEffect(() => {
+    fetch('https://graphql.datocms.com/', {
+      method: 'POST',
+      headers: {
+        'Authorization': '4e4f3d8a518feeb9a31eb3420464a1',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({ "query": `query {
+        allCommunities {
+          id
+          title
+          imageUrl
+        }
+      }` })
+    })
+  .then((response) => response.json())
+  .then((respostaCompleta) => {
+    const comunidadesVindasDoDato = respostaCompleta.data.allCommunities;
+    console.log(comunidadesVindasDoDato);
+    setComunidades(comunidadesVindasDoDato)
+
+  }
+  )
+  }, [])
+  // 1 - Criar um box que vai ter um map para buscar esse json
 
   return (
     <>
@@ -69,15 +131,25 @@ export default function Home() {
                 console.log('Campo: ', dadosDoForm.get('title'))
                 console.log('Campo: ', dadosDoForm.get('image'))
 
-                const comunidade = { 
-                  id: new Date().toISOString(),
-                  tittle: dadosDoForm.get('title'),
-                  image: dadosDoForm.get('image'),
+                const comunidade = {
+                  title: dadosDoForm.get('title'),
+                  imageUrl: dadosDoForm.get('image'),
                 }
-                
-                const comunidadesAtualizadas = [...comunidades, comunidade]
-                setComunidades(comunidadesAtualizadas)
-                console.log(comunidades);
+                fetch('/api/comunidades', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(comunidade)
+                })
+                .then(async (response) => {
+                  const dados = await response.json();
+                  console.log(dados.registroCriado);
+                  const comunidade = dados.registroCriado;
+                  const comunidadesAtualizadas = [...comunidades, comunidade];
+                  setComunidades(comunidadesAtualizadas)
+                })
+
               }
             }>
               <div>
@@ -103,7 +175,7 @@ export default function Home() {
         </div>
         <div className="profileRelationsArea" style={{ gridArea: 'profileRelationsArea' }}>
           <ProfileRelationsBoxWrapper>
-          <h2 className="smallTitle">
+            <h2 className="smallTitle">
               Comunidades ({comunidades.length})
             </h2>
 
@@ -111,8 +183,8 @@ export default function Home() {
               {comunidades.map((itemAtual) => {
                 return (
                   <li key={itemAtual.id}>
-                    <a href={`/users/${itemAtual.title}`} key={itemAtual.title}>
-                      <img src={itemAtual.image}/>
+                    <a href={`/comunities/${itemAtual.id}`} key={itemAtual.title}>
+                      <img src={itemAtual.imageUrl} />
                       <span>{itemAtual.title}</span>
                     </a>
                   </li>
@@ -121,25 +193,7 @@ export default function Home() {
               })}
             </ul>
           </ProfileRelationsBoxWrapper>
-          <ProfileRelationsBoxWrapper>
-            <h2 className="smallTitle">
-              Pessoas da comunidade ({pessoasFavoritas.push.length})
-            </h2>
-
-            <ul>
-              {pessoasFavoritas.map((itemAtual) => {
-                return (
-                  <li key={itemAtual}>
-                    <a href={`/users/${itemAtual}`} >
-                      <img src={`https://github.com/${itemAtual}.png`} style={{ borderRadius: '8px' }} />
-                      <span>{itemAtual}</span>
-                    </a>
-                  </li>
-
-                )
-              })}
-            </ul>
-          </ProfileRelationsBoxWrapper>\
+          <ProfileRelationsBox title="Seguidores" items={seguidores}/>
         </div>
       </MainGrid>
     </>
